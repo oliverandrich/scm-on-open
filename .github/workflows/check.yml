@@ -1,0 +1,34 @@
+name: Check
+
+# Runs on every push to main and every pull request, so a broken type check or test
+# surfaces before a release tag exists. Once the tag is pushed, both the tag and the
+# version-bump commit are already on origin and backing out means deleting the tag.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+
+      - run: npm ci
+      - run: npm run check
+
+      # icon.png is generated, so the generator is the source of truth only as long as
+      # something checks that the two still agree. Editing the PNG by hand fails here.
+      - name: icon.png matches its generator
+        run: |
+          python3 tools/make_icon.py
+          git diff --exit-code -- icon.png
