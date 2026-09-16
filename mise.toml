@@ -1,0 +1,22 @@
+[tools]
+node = "24"
+
+# The commands themselves live in package.json's scripts, so there is one place to change
+# them. These tasks exist so `mise run check` works the same way it does in other projects.
+
+[tasks.build]
+description = "Compile src/ to out/"
+run = "npm run build"
+
+[tasks.check]
+description = "Type check sources and tests, then run the unit tests"
+run = "npm run check"
+
+[tasks.package]
+description = "Build the .vsix"
+run = "npm run package"
+
+[tasks.install]
+description = "Build, package and install into VSCodium"
+depends = ["package"]
+run = "codium --install-extension scm-on-open-$(node -p \"require('./package.json').version\").vsix --force"

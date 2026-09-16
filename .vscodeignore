@@ -1,0 +1,8 @@
+# Allowlist: exclude everything, then add back exactly what ships. Keeps anything
+# new in the working tree out of the package by default.
+**
+!LICENSE
+!README.md
+!package.json
+!out/decide.js
+!out/extension.js

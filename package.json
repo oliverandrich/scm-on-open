@@ -1,0 +1,69 @@
+{
+  "name": "scm-on-open",
+  "displayName": "Source Control on Open",
+  "description": "Opens a window in the Source Control view when the repository has changes, and leaves a clean one alone.",
+  "version": "0.1.0",
+  "publisher": "oa",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:oliverandrich/scm-on-open.git"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "SCM Providers"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "extensionDependencies": [
+    "vscode.git"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true,
+      "description": "Only focuses a view and opens a diff editor; it never runs repository code."
+    },
+    "virtualWorkspaces": false
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "scmOnOpen.show",
+        "title": "Show Source Control and Changes",
+        "category": "Source Control on Open"
+      }
+    ],
+    "configuration": {
+      "title": "Source Control on Open",
+      "properties": {
+        "scmOnOpen.enabled": {
+          "type": "boolean",
+          "default": true,
+          "scope": "resource",
+          "description": "Open the Source Control view when the repository has changes. Put this in a repository's .vscode/settings.json to switch it off for that repository alone."
+        },
+        "scmOnOpen.viewChanges": {
+          "type": "boolean",
+          "default": true,
+          "scope": "resource",
+          "description": "Also open all changes as one multi-file diff editor."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "check": "tsc -p . --noEmit && tsc -p tsconfig.test.json && node --test src/*.test.ts",
+    "package": "npm run build && vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.3",
+    "@types/vscode": "1.90.0",
+    "@vscode/vsce": "^4.0.0",
+    "typescript": "^7.0.2"
+  }
+}
