@@ -3,17 +3,29 @@
   "displayName": "Source Control on Open",
   "description": "Opens a window in the Source Control view when the repository has changes, and leaves a clean one alone.",
   "version": "0.1.0",
-  "publisher": "oa",
+  "publisher": "oliverandrich",
   "license": "MIT",
+  "icon": "icon.png",
+  "homepage": "https://github.com/oliverandrich/scm-on-open#readme",
   "repository": {
     "type": "git",
-    "url": "git@github.com:oliverandrich/scm-on-open.git"
+    "url": "https://github.com/oliverandrich/scm-on-open.git"
+  },
+  "bugs": {
+    "url": "https://github.com/oliverandrich/scm-on-open/issues"
   },
   "engines": {
     "vscode": "^1.90.0"
   },
   "categories": [
     "SCM Providers"
+  ],
+  "keywords": [
+    "git",
+    "source control",
+    "diff",
+    "changes",
+    "startup"
   ],
   "main": "./out/extension.js",
   "activationEvents": [
@@ -58,12 +70,14 @@
   "scripts": {
     "build": "tsc -p .",
     "check": "tsc -p . --noEmit && tsc -p tsconfig.test.json && node --test src/*.test.ts",
-    "package": "npm run build && vsce package"
+    "package": "npm run build && vsce package",
+    "publish:ovsx": "npm run check && npm run package && ovsx publish $npm_package_name-$npm_package_version.vsix"
   },
   "devDependencies": {
     "@types/node": "^22.20.3",
     "@types/vscode": "1.90.0",
     "@vscode/vsce": "^4.0.0",
+    "ovsx": "^1.2.0",
     "typescript": "^7.0.2"
   }
 }

@@ -1,0 +1,66 @@
+name: Release
+
+# Cutting a release:
+#
+#   npm version <x.y.z>      bumps package.json, commits and tags v<x.y.z> in one step
+#   git push --follow-tags   pushes both and triggers this workflow
+#
+# The first release is the exception: package.json already carried 0.1.0, and npm
+# refuses an unchanged version, so v0.1.0 was tagged by hand.
+#
+# One-off prerequisites, none of which this workflow can do for you:
+#   - sign the Publisher Agreement on open-vsx.org
+#   - npx ovsx create-namespace <publisher>   (publishing fails without it)
+#   - store the Open VSX token as the OVSX_PAT repository secret
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+
+      - run: npm ci
+
+      # The tag and the manifest are written by the same `npm version` call, so a
+      # mismatch means the tag was made by hand and the wrong version is about to ship.
+      # The package name comes from the manifest too, because that is what vsce names
+      # the file after, and a rename would otherwise break the two steps below.
+      - name: Tag and package.json must agree
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          manifest="$(node -p "require('./package.json').version")"
+          if [ "$tag" != "$manifest" ]; then
+            echo "tag ${GITHUB_REF_NAME} carries ${tag}, package.json carries ${manifest}" >&2
+            exit 1
+          fi
+          echo "VSIX=$(node -p "require('./package.json').name")-${manifest}.vsix" >> "$GITHUB_ENV"
+
+      - run: npm run check
+      - run: npm run package
+
+      # Both steps tolerate having run before, so a job that failed halfway can simply
+      # be re-run. Without that, one failed step would strand the other artifact.
+      - name: Publish to Open VSX
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: npx ovsx publish "${VSIX}" --skip-duplicate
+
+      - name: Attach the package to a GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" "${VSIX}" \
+            --title "${GITHUB_REF_NAME}" --generate-notes \
+            || gh release upload "${GITHUB_REF_NAME}" "${VSIX}" --clobber

@@ -3,6 +3,8 @@
 **
 !LICENSE
 !README.md
+!CHANGELOG.md
 !package.json
+!icon.png
 !out/decide.js
 !out/extension.js
